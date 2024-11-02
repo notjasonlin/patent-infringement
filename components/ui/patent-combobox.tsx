@@ -16,25 +16,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Patent } from "@/types";
 
-type Company = {
-  id: string;
-  name: string;
-};
-
-interface ComboboxProps {
-  companies: Company[];
-  selectedCompany: Company | null;
-  onSelect: (company: Company) => void;
-  onSearch: (query: string) => void;
+interface PatentComboboxProps {
+  patents: Patent[];
+  selectedPatent: Patent | null;
+  onSelect: (patent: Patent) => void;
+  onSearch: (query: string) => Promise<void>;
 }
 
-export function Combobox({
-  companies,
-  selectedCompany,
+export function PatentCombobox({
+  patents,
+  selectedPatent,
   onSelect,
   onSearch,
-}: ComboboxProps) {
+}: PatentComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [hasSearched, setHasSearched] = React.useState(false);
 
@@ -56,7 +52,7 @@ export function Combobox({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {selectedCompany?.name ?? "Search for a company..."}
+          {selectedPatent?.publication_number ?? "Search for a patent..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -69,7 +65,7 @@ export function Combobox({
       >
         <Command shouldFilter={false}>
           <CommandInput 
-            placeholder="Search companies..." 
+            placeholder="Search patents..." 
             onValueChange={(search) => {
               setHasSearched(true);
               onSearch(search);
@@ -77,28 +73,36 @@ export function Combobox({
             }}
             className="h-9"
           />
-          {hasSearched && companies.length === 0 && (
-            <CommandEmpty>No companies found.</CommandEmpty>
+          {hasSearched && patents.length === 0 && (
+            <CommandEmpty>No patents found.</CommandEmpty>
           )}
-          <CommandGroup>
-            {companies.map((company) => (
+          <CommandGroup className="max-h-[200px] overflow-y-auto">
+            {patents.map((patent) => (
               <div
-                key={company.id}
+                key={patent.id}
                 className="px-2 py-1.5 cursor-pointer hover:bg-accent hover:text-accent-foreground flex items-center text-sm"
-                onClick={() => {
-                  onSelect(company);
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  onSelect(patent);
                   setOpen(false);
                 }}
                 role="option"
-                aria-selected={selectedCompany?.id === company.id}
+                aria-selected={selectedPatent?.id === patent.id}
               >
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    selectedCompany?.id === company.id ? "opacity-100" : "opacity-0"
+                    selectedPatent?.id === patent.id ? "opacity-100" : "opacity-0"
                   )}
                 />
-                {company.name}
+                <div className="flex flex-col">
+                  <span>{patent.publication_number}</span>
+                  {patent.title && (
+                    <span className="text-xs text-muted-foreground truncate max-w-[300px]">
+                      {patent.title}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </CommandGroup>
@@ -106,4 +110,4 @@ export function Combobox({
       </PopoverContent>
     </Popover>
   );
-}
+} 
