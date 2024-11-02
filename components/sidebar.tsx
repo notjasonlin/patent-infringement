@@ -28,7 +28,7 @@ const navigation = [
     icon: Search,
   },
   {
-    name: "History",
+    name: "Saved Searches",
     href: "/dashboard/history",
     icon: History,
   },

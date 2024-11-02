@@ -1,5 +1,4 @@
 import { SearchPatents } from "@/components/search/search-patents";
-import { SearchResults } from "@/components/search/search-results";
 
 export default function SearchPage() {
   return (
@@ -10,7 +9,6 @@ export default function SearchPage() {
       
       <div className="space-y-6">
         <SearchPatents />
-        <SearchResults />
       </div>
     </div>
   );

@@ -12,6 +12,8 @@ import { ProductList } from "@/components/search/product-list";
 import { PatentList } from "@/components/search/patent-list";
 import { Company, Product, Patent } from "@/types";
 import { PatentCombobox } from "@/components/ui/patent-combobox";
+import { PatentAnalysisSection } from "@/components/analysis/patent-analysis";
+import { PatentAnalysis } from "@/types/analysis";
 
 export function SearchPatents() {
   const [patentId, setPatentId] = useState("");
@@ -21,6 +23,7 @@ export function SearchPatents() {
   const [products, setProducts] = useState<Product[]>([]);
   const [patents, setPatents] = useState<Patent[]>([]);
   const [selectedPatent, setSelectedPatent] = useState<Patent | null>(null);
+  const [analysis, setAnalysis] = useState<PatentAnalysis | null>(null);
   const supabase = createClient();
 
   const searchCompanies = async (query: string) => {
@@ -107,88 +110,118 @@ export function SearchPatents() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCompany || !patentId) return;
+    if (!selectedCompany || !selectedPatent) return;
     
     setIsSearching(true);
     try {
-      console.log("Analyzing:", selectedCompany.name, patentId);
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          patentId: selectedPatent.publication_number,
+          companyName: selectedCompany.name,
+          products: products,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Analysis failed');
+      }
+
+      const analysisData = await response.json();
+      setAnalysis(analysisData);
+    } catch (error) {
+      console.error('Analysis error:', error);
+      // You might want to add toast notification here
     } finally {
       setIsSearching(false);
     }
   };
 
   return (
-    <Card className="p-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="company">Company Name</Label>
-          <Combobox
-            companies={companies}
-            selectedCompany={selectedCompany}
-            onSelect={(company) => {
-              setSelectedCompany(company);
-              fetchProducts(company.id);
-            }}
-            onSearch={searchCompanies}
-          />
-        </div>
-
-        {selectedCompany && products.length > 0 && (
-          <ProductList products={products} />
-        )}
-
-        <div className="space-y-2">
-          <Label htmlFor="patent-id">Patent ID</Label>
-          <PatentCombobox
-            patents={patents}
-            selectedPatent={selectedPatent}
-            onSelect={(patent) => {
-              console.log('Selected patent:', patent);
-              setSelectedPatent(patent);
-              setPatentId(patent.publication_number);
-            }}
-            onSearch={searchPatents}
-          />
-        </div>
-
-        {selectedPatent && (
-          <div className="border rounded-md bg-muted/10">
-            <PatentList patents={[selectedPatent]} />
+    <div className="space-y-6">
+      <Card className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="company">Company Name</Label>
+            <Combobox
+              companies={companies}
+              selectedCompany={selectedCompany}
+              onSelect={(company) => {
+                setSelectedCompany(company);
+                fetchProducts(company.id);
+              }}
+              onSearch={searchCompanies}
+            />
           </div>
-        )}
 
-        <div className="flex gap-2">
-          <Button 
-            type="submit" 
-            disabled={isSearching || !selectedCompany || !patentId.trim()}
-            className="w-full sm:w-auto"
-          >
-            {isSearching ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing...
-              </>
-            ) : (
-              <>
-                <Search className="mr-2 h-4 w-4" />
-                Analyze Patent
-              </>
-            )}
-          </Button>
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => {
-              setSelectedCompany(null);
-              setPatentId("");
-            }}
-            disabled={isSearching}
-          >
-            Clear
-          </Button>
-        </div>
-      </form>
-    </Card>
+          {selectedCompany && products.length > 0 && (
+            <ProductList products={products} />
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="patent-id">Patent ID</Label>
+            <PatentCombobox
+              patents={patents}
+              selectedPatent={selectedPatent}
+              onSelect={(patent) => {
+                console.log('Selected patent:', patent);
+                setSelectedPatent(patent);
+                setPatentId(patent.publication_number);
+              }}
+              onSearch={searchPatents}
+            />
+          </div>
+
+          {selectedPatent && (
+            <div className="border rounded-md bg-muted/10">
+              <PatentList patents={[selectedPatent]} />
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <Button 
+              type="submit" 
+              disabled={isSearching || !selectedCompany || !patentId.trim()}
+              className="w-full sm:w-auto"
+            >
+              {isSearching ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <Search className="mr-2 h-4 w-4" />
+                  Analyze Patent
+                </>
+              )}
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => {
+                setSelectedCompany(null);
+                setPatentId("");
+              }}
+              disabled={isSearching}
+            >
+              Clear
+            </Button>
+          </div>
+        </form>
+      </Card>
+
+      {analysis && (
+        <PatentAnalysisSection 
+          analysis={analysis}
+          companyId={selectedCompany?.id || ''}
+          onClose={() => setAnalysis(null)}
+        />
+      )}
+    </div>
   );
 }
 
