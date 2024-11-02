@@ -134,7 +134,6 @@ export function SearchPatents() {
       setAnalysis(analysisData);
     } catch (error) {
       console.error('Analysis error:', error);
-      // You might want to add toast notification here
     } finally {
       setIsSearching(false);
     }

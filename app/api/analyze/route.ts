@@ -2,17 +2,28 @@ import OpenAI from "openai";
 import { PatentAnalysis } from "@/types/analysis";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY!,
 });
 
 export async function POST(req: Request) {
-  const { patentId, companyName, products } = await req.json();
+  try {
+    const { patentId, companyName, products } = await req.json();
 
-  const prompt = `You are a patent analysis expert. Your task is to analyze potential patent infringement and return ONLY a JSON response in the exact format shown below.
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo-0125",
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: "You are a JSON-only response bot. Always respond with valid JSON matching the requested format. Never include additional text or explanations."
+        },
+        {
+          role: "user",
+          content: `Analyze potential patent infringement and return ONLY a JSON response.
 
-For patent ${patentId} by company ${companyName}, analyze these products: ${products.map((p: { name: string }) => p.name).join(", ")}
+For patent ${patentId} by company ${companyName}, analyze these products: ${JSON.stringify(products)}
 
-Required JSON format:
+Your response must follow this exact format:
 {
   "analysis_id": "${Date.now()}",
   "patent_id": "${patentId}",
@@ -23,26 +34,17 @@ Required JSON format:
       "product_name": "product name",
       "infringement_likelihood": "High|Moderate|Low",
       "relevant_claims": ["claim numbers"],
-      "explanation": "detailed explanation",
+      "explanation": "detailed explanation of how this product might infringe",
       "specific_features": ["feature 1", "feature 2"]
     }
   ],
-  "overall_risk_assessment": "detailed assessment"
+  "overall_risk_assessment": "detailed risk assessment"
 }
 
-IMPORTANT: Respond ONLY with the JSON object. Do not include any other text or explanations.`;
-
-  try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: "You are a JSON-only response bot. Always respond with valid JSON matching the requested format. Never include additional text or explanations."
-        },
-        {
-          role: "user",
-          content: prompt
+IMPORTANT: 
+1. List ONLY the top 2 most likely infringing products
+2. Respond ONLY with the JSON object
+3. Ensure all fields are present and properly formatted`
         }
       ],
       temperature: 0.7,
@@ -61,6 +63,7 @@ IMPORTANT: Respond ONLY with the JSON object. Do not include any other text or e
       console.error('JSON Parse Error:', content);
       throw new Error(`Invalid JSON response: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
     }
+
   } catch (error) {
     console.error('Analysis error:', error);
     return Response.json({ 

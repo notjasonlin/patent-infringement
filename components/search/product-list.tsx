@@ -21,6 +21,12 @@ interface ProductListProps {
 export function ProductList({ products }: ProductListProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between py-2 px-4">
@@ -28,7 +34,8 @@ export function ProductList({ products }: ProductListProps) {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={handleClick}
+          type="button"
           className="h-8 w-8 p-0"
         >
           {isExpanded ? (
