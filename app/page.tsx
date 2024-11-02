@@ -33,6 +33,9 @@ export default async function Index() {
           </Button>
         </div>
       </div>
+      <div className="absolute bottom-4 right-4 text-sm text-muted-foreground">
+        Made By Jason Lin
+      </div>  
     </div>
   );
 }

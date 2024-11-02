@@ -24,6 +24,7 @@ export function SearchPatents() {
   const [patents, setPatents] = useState<Patent[]>([]);
   const [selectedPatent, setSelectedPatent] = useState<Patent | null>(null);
   const [analysis, setAnalysis] = useState<PatentAnalysis | null>(null);
+  const [previousAnalysisId, setPreviousAnalysisId] = useState<string | null>(null);
   const supabase = createClient();
 
   const searchCompanies = async (query: string) => {
@@ -113,6 +114,8 @@ export function SearchPatents() {
     if (!selectedCompany || !selectedPatent) return;
     
     setIsSearching(true);
+    setPreviousAnalysisId(null);
+    
     try {
       const response = await fetch('/api/analyze', {
         method: 'POST',
@@ -218,6 +221,8 @@ export function SearchPatents() {
           analysis={analysis}
           companyId={selectedCompany?.id || ''}
           onClose={() => setAnalysis(null)}
+          previousAnalysisId={previousAnalysisId}
+          onSave={(analysisId) => setPreviousAnalysisId(analysisId)}
         />
       )}
     </div>

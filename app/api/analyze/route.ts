@@ -15,11 +15,11 @@ export async function POST(req: Request) {
       messages: [
         {
           role: "system",
-          content: "You are a JSON-only response bot. Always respond with valid JSON matching the requested format. Never include additional text or explanations."
+          content: "You are a patent analysis expert providing detailed technical analysis of potential patent infringement cases. Focus on specific technical comparisons and detailed explanations."
         },
         {
           role: "user",
-          content: `Analyze potential patent infringement and return ONLY a JSON response.
+          content: `Analyze potential patent infringement and return a detailed JSON response.
 
 For patent ${patentId} by company ${companyName}, analyze these products: ${JSON.stringify(products)}
 
@@ -33,21 +33,27 @@ Your response must follow this exact format:
     {
       "product_name": "product name",
       "infringement_likelihood": "High|Moderate|Low",
-      "relevant_claims": ["claim numbers"],
-      "explanation": "detailed explanation of how this product might infringe",
-      "specific_features": ["feature 1", "feature 2"]
+      "relevant_claims": ["Detailed list of specific claim numbers that may be infringed"],
+      "explanation": "Provide a detailed 3-4 sentence technical explanation of how this product might infringe, including specific features and functionalities that overlap with the patent claims. Include technical terminology and specific examples.",
+      "specific_features": ["List at least 4-5 specific technical features or components that could infringe"]
     }
   ],
-  "overall_risk_assessment": "detailed risk assessment"
+  "overall_risk_assessment": "Provide a comprehensive 4-5 sentence analysis of the overall infringement risk. Include technical details, potential mitigating factors, and specific areas of concern. Consider both direct and indirect infringement possibilities."
 }
 
 IMPORTANT: 
-1. List ONLY the top 2 most likely infringing products
-2. Respond ONLY with the JSON object
-3. Ensure all fields are present and properly formatted`
+1. List the top 2 most likely infringing products with detailed technical analysis
+2. Focus on specific technical features and claim elements rather than general similarities
+3. Use proper technical terminology relevant to the patent's field
+4. Include specific claim numbers and explain how they relate to product features
+5. Provide detailed explanations with concrete examples
+6. Consider both literal infringement and doctrine of equivalents
+7. Maintain strict JSON format
+8. Ensure explanations are at least 3-4 sentences long with technical detail`
         }
       ],
       temperature: 0.7,
+      max_tokens: 2000, // Increased token limit for more detailed responses
     });
 
     const content = completion.choices[0].message.content;

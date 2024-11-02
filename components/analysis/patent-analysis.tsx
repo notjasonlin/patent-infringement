@@ -1,22 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PatentAnalysis } from "@/types/analysis";
-import { X, Save, Check } from "lucide-react";
+import { X, Save, Check, Loader2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
 interface PatentAnalysisSectionProps {
   analysis: PatentAnalysis;
   companyId: string;
   onClose: () => void;
+  previousAnalysisId: string | null;
+  onSave: (analysisId: string) => void;
 }
 
-export function PatentAnalysisSection({ analysis, companyId, onClose }: PatentAnalysisSectionProps) {
+export function PatentAnalysisSection({ 
+  analysis, 
+  companyId, 
+  onClose,
+  previousAnalysisId,
+  onSave
+}: PatentAnalysisSectionProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const supabase = createClient();
+
+  useEffect(() => {
+    setIsSaved(false);
+  }, [analysis]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -30,7 +42,7 @@ export function PatentAnalysisSection({ analysis, companyId, onClose }: PatentAn
         ? 'Moderate'
         : 'Low';
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('analyses')
         .insert({
           patent_id: analysis.patent_id,
@@ -38,10 +50,16 @@ export function PatentAnalysisSection({ analysis, companyId, onClose }: PatentAn
           analysis_data: analysis,
           risk_level: riskLevel,
           user_id: user.id,
-        });
+        })
+        .select('id')
+        .single();
 
       if (error) throw error;
+      
       setIsSaved(true);
+      if (data) {
+        onSave(data.id);
+      }
     } catch (error) {
       console.error('Error saving analysis:', error);
     } finally {
@@ -57,36 +75,29 @@ export function PatentAnalysisSection({ analysis, companyId, onClose }: PatentAn
           <p className="text-sm text-muted-foreground">Generated on {analysis.analysis_date}</p>
         </div>
         <div className="flex gap-2">
-          {!isSaved ? (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleSave}
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                <>
-                  <Save className="h-4 w-4 mr-2 animate-pulse" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Analysis
-                </>
-              )}
-            </Button>
-          ) : (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="text-green-600"
-              disabled
-            >
-              <Check className="h-4 w-4 mr-2" />
-              Saved
-            </Button>
-          )}
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleSave}
+            disabled={isSaving || isSaved}
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : isSaved ? (
+              <>
+                <Check className="mr-2 h-4 w-4" />
+                Saved
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Save Analysis
+              </>
+            )}
+          </Button>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
