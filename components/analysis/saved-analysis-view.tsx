@@ -48,9 +48,6 @@ export function SavedAnalysisView({ analysis }: SavedAnalysisViewProps) {
               Generated on {formatDate(analysis.analysis_date)}
             </p>
           </div>
-          <Badge variant={getRiskVariant(analysis.risk_level)}>
-            {analysis.risk_level} Risk
-          </Badge>
         </CardHeader>
         <CardContent className="space-y-6">
           {analysis_data.top_infringing_products.map((product: any, index: number) => (

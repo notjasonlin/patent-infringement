@@ -23,7 +23,7 @@ const navigation = [
     icon: LayoutDashboard,
   },
   {
-    name: "Search Patents",
+    name: "Analyze Patents",
     href: "/dashboard/search",
     icon: Search,
   },
