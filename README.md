@@ -63,30 +63,24 @@ The app will be available at [http://localhost:3000](http://localhost:3000).
 
 ## Docker Deployment
 
-### Prerequisites
-- Docker installed on your machine
-- Your environment variables ready
+### Option 1: Using Pre-packaged Docker Image (Recommended)
 
-### Option 1: Using Docker Directly
-
-1. Build the Docker image:
+1. Load the provided Docker image:
 ```bash
-docker build -t checkr-app .
+docker load < checkr-app.tar
 ```
 
 2. Run the container:
 ```bash
-docker run -p 3000:3000 \
-  -e NEXT_PUBLIC_SUPABASE_URL=your_supabase_url \
-  -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key \
-  -e OPENAI_API_KEY=your_openai_key \
-  checkr-app
+docker run -p 3000:3000 checkr-app
 ```
 
-Or using your `.env.local` file:
-```bash
-docker run -p 3000:3000 --env-file .env.local checkr-app
-```
+### Security Notes
+
+1. The environment variables will be baked into the Docker image. Only share the tar file with trusted parties.
+2. The tar file will contain your API keys and sensitive information.
+3. Consider creating separate API keys for production and development environments.
+4. Regularly rotate your API keys and update the Docker image accordingly.
 
 ### Option 2: Using Docker Compose
 
@@ -111,6 +105,24 @@ docker-compose up -d
 3. Stop the containers:
 ```bash
 docker-compose down
+```
+
+The application will be available at [http://localhost:3000](http://localhost:3000).
+
+### For Developers: Creating the Docker Package
+
+1. Build the Docker image with environment variables:
+```bash
+docker build \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL=your_supabase_url \
+  --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key \
+  --build-arg OPENAI_API_KEY=your_openai_key \
+  -t checkr-app .
+```
+
+2. Save the image to a tar file:
+```bash
+docker save checkr-app > checkr-app.tar
 ```
 
 The application will be available at [http://localhost:3000](http://localhost:3000).

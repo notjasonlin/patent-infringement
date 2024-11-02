@@ -1,20 +1,33 @@
-# Use Python 3.11 slim image as base
-FROM python:3.11-slim
+# Use Node.js LTS
+FROM node:18-alpine
 
-# Set working directory in container
+# Define build arguments
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG OPENAI_API_KEY
+
+# Set environment variables
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV OPENAI_API_KEY=$OPENAI_API_KEY
+
+# Set working directory
 WORKDIR /app
 
-# Copy requirements file
-COPY requirements.txt .
+# Copy package files
+COPY package*.json ./
 
 # Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN npm install
 
-# Copy the rest of the application
+# Copy project files
 COPY . .
 
-# Expose the port the app runs on
-EXPOSE 8000
+# Build the Next.js application
+RUN npm run build
 
-# Command to run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"] 
+# Expose the port
+EXPOSE 3000
+
+# Start the application
+CMD ["npm", "start"] 
