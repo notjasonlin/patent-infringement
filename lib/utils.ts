@@ -7,6 +7,8 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatDate(dateString: string) {
   const date = new Date(dateString);
+  date.setUTCHours(24, 0, 0, 0);
+  
   return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
