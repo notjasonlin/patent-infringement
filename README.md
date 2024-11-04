@@ -1,19 +1,3 @@
-<a>
-  <h1 align="center">Checkr - Patent Analysis Platform</h1>
-</a>
-
-<p align="center">
- AI-powered patent infringement analysis tool built with Next.js and Supabase
-</p>
-
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#tech-stack"><strong>Tech Stack</strong></a> ·
-  <a href="#local-development"><strong>Local Development</strong></a> ·
-  <a href="#docker-deployment"><strong>Docker Deployment</strong></a>
-</p>
-<br/>
-
 ## About
 
 Checkr is an AI-powered patent analysis platform that helps companies identify potential patent infringement risks. It leverages OpenAI's GPT models to analyze patents and products, providing detailed insights and risk assessments.
@@ -38,64 +22,17 @@ Checkr is an AI-powered patent analysis platform that helps companies identify p
 - Tailwind CSS
 - shadcn/ui Components
 
-## Local Development
-
-1. Clone the repository
-2. create `.env.local` and insert the following:
-```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
-OPENAI_API_KEY=your_openai_key
-```
-
-3. Install dependencies:
+Local Development:
 ```bash
+Insert Env Variables
 npm install
-```
-
-4. Run the development server:
-```bash
 npm run dev
 ```
 
-The app will be available at [http://localhost:3000](http://localhost:3000).
-
-## Docker Deployment
-
-### Option 1: Using Pre-packaged Docker Image (Recommended)
-
-1. Load the provided Docker image:
-```bash
-docker load < checkr-app.tar
-```
-
-2. Run the container:
-```bash
-docker run -p 3000:3000 checkr-app
-```
-
-### For Developers: Creating the Docker Package
-
-1. Build the Docker image with environment variables:
-```bash
-docker build \
-  --build-arg NEXT_PUBLIC_SUPABASE_URL=your_supabase_url \
-  --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key \
-  --build-arg OPENAI_API_KEY=your_openai_key \
-  -t checkr-app .
-```
-
-2. Save the image to a tar file:
-```bash
-docker save checkr-app > checkr-app.tar
-```
-
-## Environment Variables
-
-Required environment variables:
-- `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous key
-- `OPENAI_API_KEY`: Your OpenAI API key
+Run with Docker Compose:
+   ```bash
+   docker-compose up
+   ```
 
 ## License
 
