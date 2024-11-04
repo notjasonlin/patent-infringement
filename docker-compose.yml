@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  web:
+    image: jaslijay/checkr:v1
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
